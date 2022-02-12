@@ -1,0 +1,23 @@
+table.root {
+    padding: 10px 10px 10px 10px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+@media screen and (min-width: 640px) {
+    table.root {
+        width: 85%;
+        margin: auto
+    }
+}
+
+th.nav {
+    width: 50%;
+    position: sticky;
+    top: 0;
+    background: linear-gradient(to bottom, white, white, #ffffff00)
+}
+
+th.nav > a > button {
+    width: 100%;
+}
