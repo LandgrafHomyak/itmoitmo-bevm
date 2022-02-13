@@ -27,11 +27,12 @@
                     id="bytecode"
                     style="resize: vertical; scroll-margin-top: 4em;"
             ></textarea> -->
-            <div id="bytecode" class="box" contenteditable="true"></div>
-            <div class="box" id="errors"></div>
+            <div id="bytecode" class="box" contenteditable="true" style="min-height: 100px;"></div>
+            <table id="output" class="box"></table>
             <table>
                 <thead>
                 <tr>
+                    <th></th> <!-- hook -->
                     <th></th> <!-- address -->
                     <th></th> <!-- value -->
                     <th></th> <!-- icons -->
@@ -49,7 +50,7 @@
     bevm.decompilerSetHooks(
         document.getElementById("address"),
         document.getElementById("bytecode"),
-        document.getElementById("errors"),
+        document.getElementById("output"),
         document.getElementById("decompiled")
     )
 </script>

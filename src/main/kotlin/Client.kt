@@ -36,15 +36,15 @@ val decompiledExport: HTMLElement
 @JsExport
 @JsName("decompilerSetHooks")
 fun decompilerSetHooks(
-    addressHtmlElement: HTMLInputElement,
-    bytecodeHtmlElement: HTMLElement,
-    errorsHtmlElement: HTMLElement,
-    decompiledHtmlElement: HTMLElement,
+    addressHtmlElement: HTMLInputElement?,
+    bytecodeHtmlElement: HTMLElement?,
+    errorsHtmlElement: HTMLElement?,
+    decompiledHtmlElement: HTMLElement?,
 ) {
-    Hooks.addressHtmlElement = addressHtmlElement
-    Hooks.bytecodeHtmlElement = bytecodeHtmlElement
-    Hooks.errorsHtmlElement = errorsHtmlElement
-    Hooks.decompiledHtmlElement = decompiledHtmlElement
+    Hooks.addressHtmlElement = addressHtmlElement!!
+    Hooks.bytecodeHtmlElement = bytecodeHtmlElement!!
+    Hooks.errorsHtmlElement = errorsHtmlElement!!
+    Hooks.decompiledHtmlElement = decompiledHtmlElement!!
     println(
         "Inserted hooks:" +
                 "\n  addressHtmlElement=$addressHtmlElement" +
@@ -62,18 +62,18 @@ fun decompile() {
         bytecodeHtmlElement = Hooks.bytecodeHtmlElement,
         errorsHtmlElement = Hooks.errorsHtmlElement,
         decompiledHtmlElement = Hooks.decompiledHtmlElement,
-    )
+    )?.let(::Decompiler)
 }
 
 @JsExport
 @JsName("decompileString")
-fun decompile(firstAddress: String, rawBytecode: String) {
+fun decompile(firstAddress: String?, rawBytecode: String?) {
     DecompilerPage(
         addressHtmlElement = Hooks.addressHtmlElement,
         bytecodeHtmlElement = Hooks.bytecodeHtmlElement,
         errorsHtmlElement = Hooks.errorsHtmlElement,
         decompiledHtmlElement = Hooks.decompiledHtmlElement,
-        firstAddress = firstAddress,
-        bytecode = rawBytecode
-    )
+        firstAddress = firstAddress!!,
+        bytecode = rawBytecode!!
+    )?.let(::Decompiler)
 }

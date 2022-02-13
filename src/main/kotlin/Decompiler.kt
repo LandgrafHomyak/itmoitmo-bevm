@@ -1,0 +1,2 @@
+class Decompiler(page: DecompilerPage) {
+}
