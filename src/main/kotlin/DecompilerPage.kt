@@ -6,6 +6,8 @@ import kotlinx.html.js.span
 import kotlinx.html.js.tr
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.Window
+import org.w3c.dom.url.URLSearchParams
 
 
 /**
@@ -37,6 +39,7 @@ class DecompilerPage private constructor(
          * @param bytecodeHtmlElement input field with encoded operations
          * @param errorsHtmlElement output node for displaying errors
          * @param decompiledHtmlElement output &lt;tbody&gt; or &lt;table&gt; tag for showing decompiled code
+         * @param window browser window
          * @param firstAddress raw predefined value in [addressHtmlElement]
          * @param bytecode raw predefined value in [bytecodeHtmlElement]
          * @return [DecompilerPage] if parsing was successful otherwise null
@@ -46,12 +49,20 @@ class DecompilerPage private constructor(
             bytecodeHtmlElement: HTMLElement,
             errorsHtmlElement: HTMLElement,
             decompiledHtmlElement: HTMLElement,
+            window: Window,
             firstAddress: String? = null,
             bytecode: String? = null,
         ): DecompilerPage? {
             val output = Output(errorsHtmlElement)
 
             val firstAddressS: String = firstAddress ?: addressHtmlElement.value
+            val bytecodeR: String = bytecode ?: bytecodeHtmlElement.innerText
+            window.history.replaceState(null, "", "?" + URLSearchParams().apply {
+                set("firstAddress", firstAddressS)
+                set("bytecode", bytecodeR)
+            }.toString())
+
+
             addressHtmlElement.value = firstAddressS
             addressHtmlElement.style.background = "white"
             val firstAddressI = try {
@@ -62,7 +73,6 @@ class DecompilerPage private constructor(
                 return null
             }
 
-            val bytecodeR: String = bytecode ?: bytecodeHtmlElement.innerText
             bytecodeHtmlElement.innerHTML = ""
             val bytecodeP = bytecodeR.prepareUByte16().also { l ->
                 if (l.isEmpty()) {
@@ -276,6 +286,5 @@ class DecompilerPage private constructor(
          * @param lines optional additional lines
          */
         fun ok(where: HtmlId, whereText: String, sentinel: Unit, firstLine: String, vararg lines: String) = this.print("green", where, whereText, firstLine, *lines)
-
     }
 }

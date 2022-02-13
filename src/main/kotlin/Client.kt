@@ -1,5 +1,7 @@
 @file:Suppress("UNUSED")
 
+import kotlinx.browser.document
+import kotlinx.browser.window
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
 
@@ -8,7 +10,7 @@ fun main() {}
 object Hooks {
     lateinit var addressHtmlElement: HTMLInputElement
     lateinit var bytecodeHtmlElement: HTMLElement
-    lateinit var errorsHtmlElement: HTMLElement
+    lateinit var outputHtmlElement: HTMLElement
     lateinit var decompiledHtmlElement: HTMLElement
 }
 
@@ -24,9 +26,9 @@ val bytecodeExport: HTMLElement
     get() = Hooks.bytecodeHtmlElement
 
 @JsExport
-@JsName("errors")
-val errorsExport: HTMLElement
-    get() = Hooks.errorsHtmlElement
+@JsName("output")
+val outputExport: HTMLElement
+    get() = Hooks.outputHtmlElement
 
 @JsExport
 @JsName("decompiled")
@@ -43,7 +45,7 @@ fun decompilerSetHooks(
 ) {
     Hooks.addressHtmlElement = addressHtmlElement!!
     Hooks.bytecodeHtmlElement = bytecodeHtmlElement!!
-    Hooks.errorsHtmlElement = errorsHtmlElement!!
+    Hooks.outputHtmlElement = errorsHtmlElement!!
     Hooks.decompiledHtmlElement = decompiledHtmlElement!!
     println(
         "Inserted hooks:" +
@@ -60,20 +62,22 @@ fun decompile() {
     DecompilerPage(
         addressHtmlElement = Hooks.addressHtmlElement,
         bytecodeHtmlElement = Hooks.bytecodeHtmlElement,
-        errorsHtmlElement = Hooks.errorsHtmlElement,
+        errorsHtmlElement = Hooks.outputHtmlElement,
         decompiledHtmlElement = Hooks.decompiledHtmlElement,
+        window= window,
     )?.let(::Decompiler)
 }
 
 @JsExport
-@JsName("decompileString")
+@JsName("decompilePreset")
 fun decompile(firstAddress: String?, rawBytecode: String?) {
     DecompilerPage(
         addressHtmlElement = Hooks.addressHtmlElement,
         bytecodeHtmlElement = Hooks.bytecodeHtmlElement,
-        errorsHtmlElement = Hooks.errorsHtmlElement,
+        errorsHtmlElement = Hooks.outputHtmlElement,
         decompiledHtmlElement = Hooks.decompiledHtmlElement,
-        firstAddress = firstAddress!!,
-        bytecode = rawBytecode!!
+        window= window,
+        firstAddress = firstAddress ?: "",
+        bytecode = rawBytecode ?: ""
     )?.let(::Decompiler)
 }

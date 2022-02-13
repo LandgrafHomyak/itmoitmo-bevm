@@ -28,7 +28,7 @@
                     style="resize: vertical; scroll-margin-top: 4em;"
             ></textarea> -->
             <div id="bytecode" class="box" contenteditable="true" style="min-height: 100px;"></div>
-            <table id="output" class="box"></table>
+            <table id="output" class="box" style="min-height: 20px;"></table>
             <table>
                 <thead>
                 <tr>
@@ -53,6 +53,15 @@
         document.getElementById("output"),
         document.getElementById("decompiled")
     )
+</script>
+<script>
+    let args = new URLSearchParams(document.location.search)
+    let firstAddress = args.get("firstAddress")
+    let bytecode = args.get("bytecode")
+    bevm.address.innerText = firstAddress === null ? "" : bytecode
+    bevm.bytecode.innerText = bytecode === null ? "" : bytecode
+    if (firstAddress !== null || bytecode !== null)
+        bevm.decompilePreset(firstAddress, bytecode)
 </script>
 </body>
 </html>
