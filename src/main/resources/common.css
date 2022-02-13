@@ -1,3 +1,7 @@
+body {
+    font-family: monospace;
+}
+
 table.root {
     padding: 10px 10px 10px 10px;
     border-collapse: collapse;
@@ -20,4 +24,16 @@ th.nav {
 
 th.nav > a > button {
     width: 100%;
+}
+
+textarea, div.box, input {
+    font-family: inherit;
+    border: 1px solid #aaa;
+    width: 100%;
+    box-sizing: border-box;
+    padding-left:5px;
+}
+
+div.box {
+    min-height: 100px;
 }

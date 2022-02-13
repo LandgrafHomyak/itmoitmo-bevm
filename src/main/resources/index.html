@@ -10,42 +10,47 @@
 <table class="root">
     <tr style="height: 3em;">
         <th class="nav">
-            <a href="#input">
+            <a href="#bytecode">
                 <button>Enter bytecode</button>
             </a>
         </th>
         <th class="nav">
-            <a href="#output" onclick="">
+            <a href="#decompiled" onclick="bevm.decompile()">
                 <button>Decompile</button>
             </a>
         </th>
     </tr>
     <tr>
         <td colspan="2">
-            <textarea
-                    id="input"
-                    style="width: 100%; resize: vertical; box-sizing: border-box; scroll-margin-top: 4em;"
-            ></textarea>
+            <input id="address" style="resize: none"/>
+            <!-- <textarea
+                    id="bytecode"
+                    style="resize: vertical; scroll-margin-top: 4em;"
+            ></textarea> -->
+            <div id="bytecode" class="box" contenteditable="true"></div>
+            <div class="box" id="errors"></div>
+            <table>
+                <thead>
+                <tr>
+                    <th></th> <!-- address -->
+                    <th></th> <!-- value -->
+                    <th></th> <!-- icons -->
+                    <th></th> <!-- mnemonic -->
+                    <th></th> <!-- comments -->
+                </tr>
+                </thead>
+                <tbody id="decompiled">
+                </tbody>
+            </table>
         </td>
-        <table>
-            <thead>
-            <tr>
-                <th></th> <!-- address -->
-                <th></th> <!-- value -->
-                <th></th> <!-- icons -->
-                <th></th> <!-- mnemonic -->
-                <th></th> <!-- comments -->
-            </tr>
-            </thead>
-            <tbody id="output">
-            </tbody>
-        </table>
     </tr>
 </table>
 <script>
     bevm.decompilerSetHooks(
-        document.getElementById("input"),
-        document.getElementById("output")
+        document.getElementById("address"),
+        document.getElementById("bytecode"),
+        document.getElementById("errors"),
+        document.getElementById("decompiled")
     )
 </script>
 </body>

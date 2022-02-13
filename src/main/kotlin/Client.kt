@@ -1,39 +1,79 @@
-import kotlinx.html.dom.append
-import kotlinx.browser.document
-import kotlinx.html.*
+@file:Suppress("UNUSED")
+
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLInputElement
 
 fun main() {}
 
-lateinit var inputElement: HTMLElement
+object Hooks {
+    lateinit var addressHtmlElement: HTMLInputElement
+    lateinit var bytecodeHtmlElement: HTMLElement
+    lateinit var errorsHtmlElement: HTMLElement
+    lateinit var decompiledHtmlElement: HTMLElement
+}
+
 
 @JsExport
-@JsName("input")
-val inputExport: HTMLElement
-    get() = inputElement
-
-lateinit var outputElement: HTMLElement
+@JsName("address")
+val addressExport: HTMLInputElement
+    get() = Hooks.addressHtmlElement
 
 @JsExport
-@JsName("output")
-val outputExport: HTMLElement
-    get() = outputElement
+@JsName("bytecode")
+val bytecodeExport: HTMLElement
+    get() = Hooks.bytecodeHtmlElement
+
+@JsExport
+@JsName("errors")
+val errorsExport: HTMLElement
+    get() = Hooks.errorsHtmlElement
+
+@JsExport
+@JsName("decompiled")
+val decompiledExport: HTMLElement
+    get() = Hooks.decompiledHtmlElement
 
 @JsExport
 @JsName("decompilerSetHooks")
-fun decompilerSetHooks(input: HTMLElement, output: HTMLElement) {
-    inputElement = input
-    outputElement = output
-    println(input)
-    println(output)
+fun decompilerSetHooks(
+    addressHtmlElement: HTMLInputElement,
+    bytecodeHtmlElement: HTMLElement,
+    errorsHtmlElement: HTMLElement,
+    decompiledHtmlElement: HTMLElement,
+) {
+    Hooks.addressHtmlElement = addressHtmlElement
+    Hooks.bytecodeHtmlElement = bytecodeHtmlElement
+    Hooks.errorsHtmlElement = errorsHtmlElement
+    Hooks.decompiledHtmlElement = decompiledHtmlElement
+    println(
+        "Inserted hooks:" +
+                "\n  addressHtmlElement=$addressHtmlElement" +
+                "\n  bytecodeHtmlElement=$bytecodeHtmlElement" +
+                "\n  errorsHtmlElement=$errorsHtmlElement" +
+                "\n  decompiledHtmlElement=$decompiledHtmlElement"
+    )
 }
 
 @JsExport
 @JsName("decompile")
 fun decompile() {
+    DecompilerPage(
+        addressHtmlElement = Hooks.addressHtmlElement,
+        bytecodeHtmlElement = Hooks.bytecodeHtmlElement,
+        errorsHtmlElement = Hooks.errorsHtmlElement,
+        decompiledHtmlElement = Hooks.decompiledHtmlElement,
+    )
 }
 
 @JsExport
 @JsName("decompileString")
-fun decompile(s: String) {
+fun decompile(firstAddress: String, rawBytecode: String) {
+    DecompilerPage(
+        addressHtmlElement = Hooks.addressHtmlElement,
+        bytecodeHtmlElement = Hooks.bytecodeHtmlElement,
+        errorsHtmlElement = Hooks.errorsHtmlElement,
+        decompiledHtmlElement = Hooks.decompiledHtmlElement,
+        firstAddress = firstAddress,
+        bytecode = rawBytecode
+    )
 }
