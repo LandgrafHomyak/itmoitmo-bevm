@@ -287,4 +287,23 @@ class DecompilerPage private constructor(
          */
         fun ok(where: HtmlId, whereText: String, sentinel: Unit, firstLine: String, vararg lines: String) = this.print("green", where, whereText, firstLine, *lines)
     }
+
+    class DecompiledRow()
+
+    private class Chunk()
+}
+
+enum class GotoIcon(val path: String) {
+    CONDITIONAL("goto/conditional.svg"),
+    STRONG("goto/strong.svg")
+}
+
+enum class ArgumentIcon(val path: String) {
+    ABSOLUTE("arguments/absolute.svg"),
+    OFFSET("arguments/offset.svg"),
+    POINTER("arguments/pointer.svg"),
+    POINTER_INC("arguments/pointer-inc.svg"),
+    POINTER_DEC("arguments/pointer-dec.svg"),
+    STACK("arguments/stack.svg"),
+    CONST("arguments/const.svg"),
 }
