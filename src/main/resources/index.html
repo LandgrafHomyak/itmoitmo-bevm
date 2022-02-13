@@ -22,13 +22,19 @@
     </tr>
     <tr>
         <td colspan="2">
-            <input id="address" style="resize: none"/>
-            <!-- <textarea
-                    id="bytecode"
-                    style="resize: vertical; scroll-margin-top: 4em;"
-            ></textarea> -->
+            <div style="display: flex; flex-direction: row; flex-wrap: wrap-reverse">
+                <input id="address" style="flex: 1; min-width: 100px"/>
+                <label for="address" style="text-align: center; white-space: nowrap; margin: auto; flex: 0">
+                    Address of first operation
+                </label>
+            </div>
+            <div style="text-align: center">Bytecode</div>
             <div id="bytecode" class="box" contenteditable="true" style="min-height: 100px;"></div>
+            <br>
+            <div style="text-align: center">Messages</div>
             <table id="output" class="box" style="min-height: 20px;"></table>
+            <br>
+            <div style="text-align: center; border-bottom: 1px solid #aaa">Decompiled code</div>
             <table>
                 <thead>
                 <tr>
@@ -37,6 +43,7 @@
                     <th></th> <!-- value -->
                     <th></th> <!-- icons -->
                     <th></th> <!-- mnemonic -->
+                    <th></th> <!-- argument -->
                     <th></th> <!-- comments -->
                 </tr>
                 </thead>
