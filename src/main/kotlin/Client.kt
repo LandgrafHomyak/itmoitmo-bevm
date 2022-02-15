@@ -64,8 +64,8 @@ fun decompile() {
         bytecodeHtmlElement = Hooks.bytecodeHtmlElement,
         errorsHtmlElement = Hooks.outputHtmlElement,
         decompiledHtmlElement = Hooks.decompiledHtmlElement,
-        window= window,
-    )?.let(::Decompiler)
+        window = window,
+    )?.decompileMap { DecompilerPage.DecompiledRow("abc", GotoIcon.CONDITIONAL, Argument.POINTER_INC(123), "123") }
 }
 
 @JsExport
@@ -76,7 +76,7 @@ fun decompile(firstAddress: String?, rawBytecode: String?) {
         bytecodeHtmlElement = Hooks.bytecodeHtmlElement,
         errorsHtmlElement = Hooks.outputHtmlElement,
         decompiledHtmlElement = Hooks.decompiledHtmlElement,
-        window= window,
+        window = window,
         firstAddress = firstAddress ?: "",
         bytecode = rawBytecode ?: ""
     )?.let(::Decompiler)

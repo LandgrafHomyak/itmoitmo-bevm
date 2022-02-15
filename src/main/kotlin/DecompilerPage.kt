@@ -10,6 +10,8 @@ import org.w3c.dom.Window
 import org.w3c.dom.url.URLSearchParams
 
 
+private val minusHex = Regex("^(-?)(.*)$")
+
 /**
  * Shortcut for preparing array to parsing
  * @return [List]&lt;[String]&gt;
@@ -54,6 +56,7 @@ class DecompilerPage private constructor(
             bytecode: String? = null,
         ): DecompilerPage? {
             val output = Output(errorsHtmlElement)
+            decompiledHtmlElement.innerHTML = ""
 
             val firstAddressS: String = firstAddress ?: addressHtmlElement.value
             val bytecodeR: String = bytecode ?: bytecodeHtmlElement.innerText
@@ -83,7 +86,7 @@ class DecompilerPage private constructor(
                 lateinit var element: HTMLElement
                 bytecodeHtmlElement.append {
                     element = span {
-                        id = (firstAddressI + i).toHtmlId()
+                        id = (firstAddressI + i).toHtmlIdS()
                         +s
                     }
                     br {}
@@ -123,7 +126,7 @@ class DecompilerPage private constructor(
      */
     class ByteCodeMapping(
         private val firstAddress: Address, private val codes: Array<OpCode>
-    ) {
+    ) : Iterable<ByteCodeMapping.Row> {
         /**
          * Class for iterating operations with theirs addresses
          * @property address operation's address
@@ -173,7 +176,7 @@ class DecompilerPage private constructor(
          * Iterates over all operations with theirs addresses
          * @see Row
          */
-        operator fun iterator(): Iterator<Row> = iterator {
+        override operator fun iterator(): Iterator<Row> = iterator {
             this@ByteCodeMapping.codes.forEachIndexed { i, c ->
                 yield(Row(this@ByteCodeMapping.firstAddress + i, c))
             }
@@ -288,9 +291,130 @@ class DecompilerPage private constructor(
         fun ok(where: HtmlId, whereText: String, sentinel: Unit, firstLine: String, vararg lines: String) = this.print("green", where, whereText, firstLine, *lines)
     }
 
-    class DecompiledRow()
+    class DecompiledRow(
+        val mnemonic: String,
+        val gotoIcon: GotoIcon?,
+        val argument: Argument?,
+        val comment: String
+    )
 
-    private class Chunk()
+    fun decompileMap(transform: DecompilerPage.(ByteCodeMapping.Row) -> DecompiledRow) {
+        val code: MutableMap<Address, DecompiledRow> = HashMap()
+        val data: MutableSet<Address> = HashSet()
+        for (row in this.bytecode) {
+            val dec = transform(this, row)
+            code[row.address] = dec
+            if (dec.argument != null) {
+                when (dec.argument) {
+                    is Argument.ABSOLUTE -> data.add(dec.argument.value)
+                    is Argument.OFFSET -> data.add((row.address.toInt() + dec.argument.value).toAddress())
+                    is Argument.POINTER -> data.add((row.address.toInt() + dec.argument.value).toAddress())
+                    is Argument.POINTER_INC -> data.add((row.address.toInt() + dec.argument.value).toAddress())
+                    is Argument.POINTER_DEC -> data.add((row.address.toInt() + dec.argument.value).toAddress())
+                    is Argument.STACK, is Argument.CONST -> {}
+                }
+            }
+        }
+
+        this.decompiledHtmlElement.append {
+            val addrs: Set<Address> = code.keys union data
+            println(addrs)
+            for (addr in addrs.sorted()) {
+                tr {
+                    id = addr.toHtmlIdD()
+                    classes = setOf("code")
+                    td {
+                        classes = setOf("hook")
+                        a {
+                            href = "#" + addr.toHtmlIdD()
+                            +"\u00b6"
+                        }
+                    }
+                    td {
+                        classes = setOf("address")
+                        val s = addr.toString(16).padStart(3, '0')
+                        if (addr in code) {
+                            a {
+                                href = "#" + addr.toHtmlIdS()
+                                +s
+                            }
+                        } else {
+                            +s
+                        }
+                    }
+                    td {
+                        classes = setOf("value")
+                        if (addr in code) {
+                            +this@DecompilerPage.bytecode[addr].toString(16).padStart(4, '0')
+                        } else {
+                            +"0000"
+                        }
+                    }
+                    td {
+                        classes = setOf("icons")
+                        val dec = (code[addr] ?: return@td)
+                        if (dec.gotoIcon != null) {
+                            img {
+                                src = dec.gotoIcon.path
+                            }
+                        }
+                        if (dec.argument != null) {
+                            img {
+                                src = dec.argument.path
+                            }
+                        }
+                    }
+                    td {
+                        classes = setOf("mnemonic")
+                        +(code[addr] ?: return@td).mnemonic
+                    }
+                    td {
+                        classes = setOf("argument")
+                        val arg = (code[addr]?.argument ?: return@td)
+                        +when (arg) {
+                            is Argument.ABSOLUTE -> "$0x${arg.value.toString(16).padStart(3, '0')}"
+                            is Argument.OFFSET -> minusHex.replace(arg.value.toString(16)) { m -> "${m.groups[1]?.value ?: ""}0x${m.groups[2]?.value ?: 0}" }
+                            is Argument.POINTER -> minusHex.replace(arg.value.toString(16)) { m -> "*${m.groups[1]?.value ?: ""}0x${m.groups[2]?.value ?: 0})" }
+                            is Argument.POINTER_INC -> minusHex.replace(arg.value.toString(16)) { m -> "*${m.groups[1]?.value ?: ""}0x${m.groups[2]?.value ?: 0}++" }
+                            is Argument.POINTER_DEC -> minusHex.replace(arg.value.toString(16)) { m -> "--*${m.groups[1]?.value ?: ""}0x${m.groups[2]?.value ?: 0}" }
+                            is Argument.STACK -> minusHex.replace(arg.value.toString(16)) { m -> "SP${m.groups[1]?.value?.takeIf(String::isNotEmpty) ?: "+"}0x${m.groups[2]?.value ?: 0}" }
+                            is Argument.CONST -> minusHex.replace(arg.value.toString(16)) { m -> "#${m.groups[1]?.value ?: ""}0x${m.groups[2]?.value ?: 0}" }
+                        }
+                    }
+                    td {
+                        classes = setOf("pointer")
+                        val arg = (code[addr]?.argument ?: return@td)
+                        val p: Address = when (arg) {
+                            is Argument.ABSOLUTE -> arg.value
+                            is Argument.OFFSET -> (addr.toInt() + arg.value).toAddress()
+                            is Argument.POINTER -> (addr.toInt() + arg.value).toAddress()
+                            is Argument.POINTER_INC -> (addr.toInt() + arg.value).toAddress()
+                            is Argument.POINTER_DEC -> (addr.toInt() + arg.value).toAddress()
+                            is Argument.CONST, is Argument.STACK -> return@td
+                        }
+                        a {
+                            href = "#" + p.toHtmlIdD()
+                            +"#${p.toString(16)}"
+                        }
+
+                    }
+                    td {
+                        classes = setOf("comment")
+                    }
+                }
+                if ((addr + 1u).toAddress() !in addrs) {
+                    tr {
+                        classes = setOf("pass")
+                        td {
+                            colSpan = "8"
+                            +"\u2022\u2022\u2022"
+                        }
+                    }
+                }
+            }
+        }
+        this.decompiledHtmlElement.lastElementChild?.remove()
+    }
 }
 
 enum class GotoIcon(val path: String) {
@@ -298,12 +422,12 @@ enum class GotoIcon(val path: String) {
     STRONG("goto/strong.svg")
 }
 
-enum class ArgumentIcon(val path: String) {
-    ABSOLUTE("arguments/absolute.svg"),
-    OFFSET("arguments/offset.svg"),
-    POINTER("arguments/pointer.svg"),
-    POINTER_INC("arguments/pointer-inc.svg"),
-    POINTER_DEC("arguments/pointer-dec.svg"),
-    STACK("arguments/stack.svg"),
-    CONST("arguments/const.svg"),
+sealed class Argument(val path: String) {
+    class ABSOLUTE(val value: Address) : Argument("arguments/absolute.svg")
+    class OFFSET(val value: Byte) : Argument("arguments/offset.svg")
+    class POINTER(val value: Byte) : Argument("arguments/pointer.svg")
+    class POINTER_INC(val value: Byte) : Argument("arguments/pointer-inc.svg")
+    class POINTER_DEC(val value: Byte) : Argument("arguments/pointer-dec.svg")
+    class STACK(val value: Byte) : Argument("arguments/stack.svg")
+    class CONST(val value: Byte) : Argument("arguments/const.svg")
 }

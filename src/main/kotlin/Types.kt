@@ -21,4 +21,5 @@ operator fun Address.plus(other: Int): Address = (this + other.toUShort()).toAdd
 
 typealias HtmlId = String
 
-inline fun Address.toHtmlId(): HtmlId = "bc-$this"
+inline fun Address.toHtmlIdS(): HtmlId = "bc-$this"
+inline fun Address.toHtmlIdD(): HtmlId = "dec-$this"
